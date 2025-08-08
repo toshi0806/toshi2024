@@ -1,0 +1,41 @@
+---
+# LaTeX Document Build and Release Workflow
+# Automatically builds LaTeX documents into PDFs and creates releases
+name: Build and Release PDF
+
+on:
+  # Trigger on pull requests for PDF preview generation
+  pull_request_target:
+  # Trigger on tags for release creation
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write  # Required for creating releases and uploading artifacts
+
+jobs:
+  build-and-release-pdf:
+    name: Build LaTeX Documents and Create Release
+    runs-on: ubuntu-latest
+    # Use the latest TeXLive Japanese environment with textlint support
+    container: ghcr.io/smkwlab/texlive-ja-textlint:2025b
+
+    steps:
+      # Build LaTeX documents using the latex-release-action
+      - name: Build and Release LaTeX Documents
+        uses: smkwlab/latex-release-action@v2.2.0
+        with:
+          # Specify multiple files to build (comma-separated)
+          # Common document types: main report, appendix, slides, etc.
+          files: main, appendix, slide, report
+
+          # Upload PDFs as artifacts for pull requests (enables preview)
+          upload_on_pr: true
+
+          # latexmk will use .latexmkrc configuration
+          # No additional options needed - respects uplatex + dvipdfmx workflow
+          # latex_options: (not specified to use .latexmkrc defaults)
+
+          # Clean up intermediate files after build
+          cleanup: true
